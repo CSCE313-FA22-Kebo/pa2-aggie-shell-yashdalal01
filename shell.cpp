@@ -91,14 +91,14 @@ int main ()
             }; 
 
         } 
-        
+        /*
         else if(strcmp(cdArgumentChecker[0], "cd") == 0 && strcmp(cdArgumentChecker[1],"-") == 0)
         {
             if (chdir(previousDirectory.c_str()) < 0) 
             {
                 perror("chdir");
             }; 
-        }   
+        } */  
         else
         {
             for(long unsigned int i = 0; i<token.commands.size(); i++)
