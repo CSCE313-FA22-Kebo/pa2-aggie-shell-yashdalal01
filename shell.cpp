@@ -3,9 +3,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <sys/param.h>
+#include <ctime>
+#include <chrono>
+#include <time.h>
 
 #include <vector>
 #include <string>
+#include <string.h>
 
 #include "Tokenizer.h"
 
@@ -25,7 +30,13 @@ int main ()
     for (;;) 
     {
         // need date/time, username, and absolute path to current dir
-        cout << RED << "Yash's Shell$" << NC << " ";
+        char directory [MAXPATHLEN];
+        char *path = getcwd(directory,MAXPATHLEN);
+
+        time_t timer = time(NULL);
+        string absolutePath = path;
+       
+        cout << YELLOW <<ctime(&timer) << " "<< YELLOW << getenv("USER") << " "<<YELLOW << absolutePath <<"$"<<NC<<" ";
         
         // get user inputted command
         string input;
@@ -35,6 +46,7 @@ int main ()
         int in = dup(0);
         int out = dup(1);
         vector <char*> arguments;
+        vector <char*> cdArgumentChecker;
 
         if (input == "exit" || input == "Exit") 
         {  // print exit message and break out of infinite loop
@@ -49,6 +61,7 @@ int main ()
 
         // get tokenized commands from user input
         Tokenizer token(input);
+        Tokenizer token2(input);
         if (token.hasError()) {  // continue to next prompt if input had an error
             continue;
         }
@@ -68,57 +81,94 @@ int main ()
         //     cerr << endl;
         // }
 
-        for(long unsigned int i = 0; i<token.commands.size(); i++)
-        {            
-            int fd[2];
-            if(pipe(fd) == -1)
+        for(long unsigned int i = 0; i<token2.commands.size(); i++)
+        {
+            for(long unsigned int j = 0; j<token2.commands[i]->args.size();j++)
             {
-                return 0;
+                cdArgumentChecker.push_back(const_cast<char*>(token2.commands[i]->args[j].c_str()));
             }
 
-            int pid = fork();
-
-            if(pid == 0)
-            { 
-                for(long unsigned int j = 0; j<token.commands[i]->args.size();j++)
-                {
-                    arguments.push_back(const_cast<char*>(token.commands[i]->args[j].c_str()));
-                }
-
-                arguments.push_back(NULL);
-
-                if(i < token.commands.size() - 1)
-                {
-                    dup2(fd[1],STDOUT_FILENO);
-                }
-                
-                close(fd[STDIN_FILENO]);
-
-                if (execvp(arguments[0], arguments.data()) < 0) 
-                {
-                    perror("execvp");
-                    exit(1);
-                };
-            }
-            else
-            {
-                //Redriect the SHELL(PARENT)'s input to the read end of the pipe 
-                dup2(fd[0],STDIN_FILENO);
-
-                //Close the write end of the pipe 
-                close(fd[STDOUT_FILENO]);
-
-                //Wait until the last command finishes 
-                if(i==token.commands.size()-1)
-                {
-                    wait(0);
-                }
-            }
+            cdArgumentChecker.push_back(NULL);
         }
 
-        //use dup(2) to restore the stdin and stdout 
-        dup2(in,0);
-        dup2(out,1);
+
+        if(strcmp(cdArgumentChecker[0], "cd") == 0 && strcmp(cdArgumentChecker[1],"-") != 0)
+        {
+            char currentDirectory [MAXPATHLEN];
+            char *pathDirectory = getcwd(currentDirectory,MAXPATHLEN);
+
+            string currentPathDirectory = pathDirectory;
+            currentPathDirectory = currentPathDirectory + "/" + cdArgumentChecker[1];
+
+            if (chdir(currentPathDirectory.c_str()) < 0) 
+            {
+                perror("chdir");
+            }; 
+
+        } 
+        /*
+        else if(strcmp(arguments[0], "cd") == 0 && strcmp(arguments[1],"-") == 0)
+        {
+            cout<<"Change Directory with -"<<endl;
+        }  */
+        else
+        {
+            for(long unsigned int i = 0; i<token.commands.size(); i++)
+            {            
+                int fd[2];
+                if(pipe(fd) == -1)
+                {
+                    return 0;
+                }
+
+                int pid = fork();
+
+                if(pid == 0)
+                { 
+                    
+                    for(long unsigned int j = 0; j<token.commands[i]->args.size();j++)
+                    {
+                        arguments.push_back(const_cast<char*>(token.commands[i]->args[j].c_str()));
+                    }
+
+                    arguments.push_back(NULL); 
+                    
+                    if(i < token.commands.size() - 1)
+                    {
+                        dup2(fd[1],STDOUT_FILENO);
+                    }
+                    
+                    close(fd[STDIN_FILENO]);
+
+                    if (execvp(arguments[0], arguments.data()) < 0) 
+                    {
+                        perror("execvp");
+                        exit(1);
+                    }; 
+                }
+                else
+                {
+                    //Redriect the SHELL(PARENT)'s input to the read end of the pipe 
+                    dup2(fd[0],STDIN_FILENO);
+
+                    //Close the write end of the pipe 
+                    close(fd[STDOUT_FILENO]);
+
+                    //Wait until the last command finishes 
+                    if(i==token.commands.size()-1)
+                    {
+                        wait(0);
+                    }
+                }
+            }
+
+            //use dup(2) to restore the stdin and stdout 
+            dup2(in,0);
+            dup2(out,1);
+
+        
+        
+        }
 
 
     }
