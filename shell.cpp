@@ -64,12 +64,13 @@ int main ()
 
         // get tokenized commands from user input
         Tokenizer token(input);
+        Tokenizer token2(input);
         if (token.hasError()) {  // continue to next prompt if input had an error
             continue;
         }
         
-        cdArgumentChecker.push_back(const_cast<char*>(token.commands[0]->args[0].c_str()));
-        cdArgumentChecker.push_back(const_cast<char*>(token.commands[0]->args[1].c_str()));
+        cdArgumentChecker.push_back(const_cast<char*>(token2.commands[0]->args[0].c_str()));
+        cdArgumentChecker.push_back(const_cast<char*>(token2.commands[0]->args[1].c_str()));
         cdArgumentChecker.push_back(NULL);
 
         char currentDirectory [MAXPATHLEN];
