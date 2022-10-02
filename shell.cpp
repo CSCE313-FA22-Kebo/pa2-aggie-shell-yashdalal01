@@ -39,7 +39,8 @@ int main ()
         strftime(buffer,256,"%b %d %T",timeInfo);
 
         string absolutePath = path;
-        cout << YELLOW << buffer << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
+        //cout << YELLOW << buffer << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
+        cout << YELLOW << ctime(&timer) << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
         
         // get user inputted command
         string input;
@@ -64,13 +65,12 @@ int main ()
 
         // get tokenized commands from user input
         Tokenizer token(input);
-        Tokenizer token2(input);
         if (token.hasError()) {  // continue to next prompt if input had an error
             continue;
         }
-        
-        cdArgumentChecker.push_back(const_cast<char*>(token2.commands[0]->args[0].c_str()));
-        cdArgumentChecker.push_back(const_cast<char*>(token2.commands[0]->args[1].c_str()));
+
+        cdArgumentChecker.push_back(const_cast<char*>(token.commands[0]->args[0].c_str()));
+        cdArgumentChecker.push_back(const_cast<char*>(token.commands[0]->args[1].c_str()));
         cdArgumentChecker.push_back(NULL);
 
         char currentDirectory [MAXPATHLEN];
@@ -92,14 +92,14 @@ int main ()
             }; 
 
         } 
-        /*
+        
         else if(strcmp(cdArgumentChecker[0], "cd") == 0 && strcmp(cdArgumentChecker[1],"-") == 0)
         {
             if (chdir(previousDirectory.c_str()) < 0) 
             {
                 perror("chdir");
             }; 
-        } */  
+        } 
         else
         {
             for(long unsigned int i = 0; i<token.commands.size(); i++)
@@ -156,13 +156,8 @@ int main ()
             dup2(in,0);
             dup2(out,1);
 
-        
-        
         }
-
-
     }
-
     return 0; 
 }
 
