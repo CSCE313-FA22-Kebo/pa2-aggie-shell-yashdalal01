@@ -160,7 +160,8 @@ int main ()
                     //Wait until the last command finishes 
                     if(i==token.commands.size()-1)
                     {
-                        wait(0);
+                        int status;
+                        waitpid(pid,&status,0);
                     }
                 }
             }
