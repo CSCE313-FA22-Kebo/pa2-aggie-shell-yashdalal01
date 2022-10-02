@@ -32,11 +32,14 @@ int main ()
         // need date/time, username, and absolute path to current dir
         char directory [MAXPATHLEN];
         char *path = getcwd(directory,MAXPATHLEN);
+        char buffer[256];
 
         time_t timer = time(NULL);
+        struct tm* timeInfo = localtime(&timer);
+        strftime(buffer,256,"%b %d %T",timeInfo);
+
         string absolutePath = path;
-       
-        cout << YELLOW <<ctime(&timer) << " "<< YELLOW << getenv("USER") << " "<<YELLOW << absolutePath <<"$"<<NC<<" ";
+        cout << YELLOW << buffer << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
         
         // get user inputted command
         string input;
