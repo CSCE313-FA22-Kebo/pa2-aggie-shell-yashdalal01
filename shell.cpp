@@ -64,56 +64,41 @@ int main ()
 
         // get tokenized commands from user input
         Tokenizer token(input);
-        Tokenizer token2(input);
         if (token.hasError()) {  // continue to next prompt if input had an error
             continue;
         }
+        
+        cdArgumentChecker.push_back(const_cast<char*>(token.commands[0]->args[0].c_str()));
+        cdArgumentChecker.push_back(const_cast<char*>(token.commands[0]->args[1].c_str()));
+        cdArgumentChecker.push_back(NULL);
 
-        // // print out every command token-by-token on individual lines
-        // // prints to cerr to avoid influencing autograder
-        // for (auto cmd : token.commands) {
-        //     for (auto str : cmd->args) {
-        //         cerr << "|" << str << "| ";
-        //     }
-        //     if (cmd->hasInput()) {
-        //         cerr << "in< " << cmd->in_file << " ";
-        //     }
-        //     if (cmd->hasOutput()) {
-        //         cerr << "out> " << cmd->out_file << " ";
-        //     }
-        //     cerr << endl;
-        // }
+        char currentDirectory [MAXPATHLEN];
+        char *pathDirectory = getcwd(currentDirectory,MAXPATHLEN);
 
-        for(long unsigned int i = 0; i<token2.commands.size(); i++)
-        {
-            for(long unsigned int j = 0; j<token2.commands[i]->args.size();j++)
-            {
-                cdArgumentChecker.push_back(const_cast<char*>(token2.commands[i]->args[j].c_str()));
-            }
-
-            cdArgumentChecker.push_back(NULL);
-        }
-
-
+        string currentPathDirectory = pathDirectory;
+        string temp;
+        string previousDirectory;
+        
         if(strcmp(cdArgumentChecker[0], "cd") == 0 && strcmp(cdArgumentChecker[1],"-") != 0)
         {
-            char currentDirectory [MAXPATHLEN];
-            char *pathDirectory = getcwd(currentDirectory,MAXPATHLEN);
+            
+            string newPathDirectory = currentPathDirectory + "/" + cdArgumentChecker[1];
+            previousDirectory = currentPathDirectory;
 
-            string currentPathDirectory = pathDirectory;
-            currentPathDirectory = currentPathDirectory + "/" + cdArgumentChecker[1];
-
-            if (chdir(currentPathDirectory.c_str()) < 0) 
+            if (chdir(newPathDirectory.c_str()) < 0) 
             {
                 perror("chdir");
             }; 
 
         } 
-        /*
-        else if(strcmp(arguments[0], "cd") == 0 && strcmp(arguments[1],"-") == 0)
+        
+        else if(strcmp(cdArgumentChecker[0], "cd") == 0 && strcmp(cdArgumentChecker[1],"-") == 0)
         {
-            cout<<"Change Directory with -"<<endl;
-        }  */
+            if (chdir(previousDirectory.c_str()) < 0) 
+            {
+                perror("chdir");
+            }; 
+        }   
         else
         {
             for(long unsigned int i = 0; i<token.commands.size(); i++)
@@ -176,7 +161,24 @@ int main ()
 
 
     }
+
+    return 0; 
 }
+
+// // print out every command token-by-token on individual lines
+        // // prints to cerr to avoid influencing autograder
+        // for (auto cmd : token.commands) {
+        //     for (auto str : cmd->args) {
+        //         cerr << "|" << str << "| ";
+        //     }
+        //     if (cmd->hasInput()) {
+        //         cerr << "in< " << cmd->in_file << " ";
+        //     }
+        //     if (cmd->hasOutput()) {
+        //         cerr << "out> " << cmd->out_file << " ";
+        //     }
+        //     cerr << endl;
+        // }
 
 
 /*
