@@ -92,19 +92,18 @@ int main ()
                     newPathDirectory = cdArgumentChecker[1];
                     newPath = newPathDirectory;
                 }
+
+                /*
                 else if(strcmp(cdArgumentChecker[1],"~") == 0)
                 {
                     
-                }
-
+                } */
                 else
                 {
                     newPathDirectory = currentPathDirectory + "/" + cdArgumentChecker[1];
                     newPath = newPathDirectory;
                 }
     
-                //Should I be able to do cd ~?
-
                 if (chdir(newPathDirectory.c_str()) < 0) 
                 {
                     perror("chdir");
@@ -120,9 +119,7 @@ int main ()
                 temp = oldPath;
                 oldPath = newPath;
                 newPath = temp;
-                
             }
-
         } 
 
         else
