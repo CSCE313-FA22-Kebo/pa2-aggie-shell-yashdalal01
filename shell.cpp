@@ -26,6 +26,8 @@ using namespace std;
 
 int main () 
 {
+    string oldPath;
+    string newPath;
 
     for (;;) 
     {
@@ -39,8 +41,8 @@ int main ()
         strftime(buffer,256,"%b %d %T",timeInfo);
 
         string absolutePath = path;
-        //cout << YELLOW << buffer << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
-        cout << YELLOW << ctime(&timer) << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
+        cout << YELLOW << buffer << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
+        //cout << YELLOW << ctime(&timer) << " "<< YELLOW << getenv("USER") << ":"<<YELLOW << absolutePath <<"$"<<NC<<" ";
         
         // get user inputted command
         string input;
@@ -77,29 +79,52 @@ int main ()
         char *pathDirectory = getcwd(currentDirectory,MAXPATHLEN);
 
         string currentPathDirectory = pathDirectory;
-        string temp;
-        string previousDirectory;
         
-        if(strcmp(cdArgumentChecker[0], "cd") == 0 && strcmp(cdArgumentChecker[1],"-") != 0)
+        if(strcmp(cdArgumentChecker[0], "cd") == 0)
         {
-            
-            string newPathDirectory = currentPathDirectory + "/" + cdArgumentChecker[1];
-            previousDirectory = currentPathDirectory;
-
-            if (chdir(newPathDirectory.c_str()) < 0) 
+            if(strcmp(cdArgumentChecker[1],"-") != 0)
             {
-                perror("chdir");
-            }; 
+                oldPath = currentPathDirectory;
+                string newPathDirectory;
+
+                if(strcmp(cdArgumentChecker[1],"/home") == 0) 
+                {
+                    newPathDirectory = cdArgumentChecker[1];
+                    newPath = newPathDirectory;
+                }
+                else if(strcmp(cdArgumentChecker[1],"~") == 0)
+                {
+                    
+                }
+
+                else
+                {
+                    newPathDirectory = currentPathDirectory + "/" + cdArgumentChecker[1];
+                    newPath = newPathDirectory;
+                }
+    
+                //Should I be able to do cd ~?
+
+                if (chdir(newPathDirectory.c_str()) < 0) 
+                {
+                    perror("chdir");
+                }; 
+            }
+            else //cd - case
+            {
+                if (chdir(oldPath.c_str()) < 0) 
+                {
+                    perror("cd: OLDPWD not set");
+                }; 
+                string temp;
+                temp = oldPath;
+                oldPath = newPath;
+                newPath = temp;
+                
+            }
 
         } 
-        
-        else if(strcmp(cdArgumentChecker[0], "cd") == 0 && strcmp(cdArgumentChecker[1],"-") == 0)
-        {
-            if (chdir(previousDirectory.c_str()) < 0) 
-            {
-                perror("chdir");
-            }; 
-        } 
+
         else
         {
             for(long unsigned int i = 0; i<token.commands.size(); i++)
