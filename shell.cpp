@@ -49,7 +49,7 @@ int main()
         // get user inputted command
         string input;
         getline(cin, input);
-        cout<<"Input: "<<input<<endl;
+        //cout<<"Input: "<<input<<endl;
 
         // Save original stdin and stdout
         int in = dup(0);
@@ -106,6 +106,7 @@ int main()
 
         if (strcmp(cdArgumentChecker[0], "cd") == 0)
         {
+            
             if (strcmp(cdArgumentChecker[1], "-") != 0)
             {
                 oldPath = currentPathDirectory;
@@ -129,7 +130,7 @@ int main()
                 temp = oldPath;
                 oldPath = newPath;
                 newPath = temp;
-            }
+            } 
         }
 
         else
