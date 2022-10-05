@@ -73,12 +73,12 @@ int main()
         for (long unsigned int i = 0; i < listPids.size(); i++)
         {
             int status;
-            cout << "BG" << endl;
+            //cout << "BG" << endl;
             if (waitpid(listPids[i], &status, WNOHANG) > 0) // Greater then 0 means child died
             {
                 if (WIFSIGNALED(status) == true)
                 {
-                    cout << "Erased " << endl;
+                    //cout << "Erased " << endl;
                     listPids.erase(listPids.begin() + i);
                     i = i - 1;
                 }
@@ -165,7 +165,7 @@ int main()
 
                     if (token.commands.at(i)->hasOutput())
                     {
-                        cout<<token.commands.at(i)->out_file.c_str()<<endl;
+                        //cout<<token.commands.at(i)->out_file.c_str()<<endl;
                         opener = open(token.commands.at(i)->out_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
                         dup2(opener, STDOUT_FILENO);
                     }
