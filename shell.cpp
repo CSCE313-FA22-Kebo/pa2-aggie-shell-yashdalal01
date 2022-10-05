@@ -13,7 +13,6 @@
 #include <string.h>
 #include <fcntl.h>
 
-
 #include "Tokenizer.h"
 
 // all the basic colours for a shell prompt
@@ -27,11 +26,13 @@
 using namespace std;
 
 
+
+
 int main()
 {
     string oldPath;
     string newPath;
-    vector<pid_t> PIDS;
+    vector<pid_t> listPids;
 
     for (;;)
     {
@@ -58,6 +59,7 @@ int main()
         vector<char *> arguments;
         vector<char *> cdArgumentChecker;
 
+        
         if (input == "exit" || input == "Exit")
         { // print exit message and break out of infinite loop
             cout << RED << "Now exiting shell..." << endl
@@ -69,6 +71,26 @@ int main()
         {
             continue;
         }
+
+        //Checking for background processes
+        for(long unsigned int i = 0; i<listPids.size();i++)
+        {
+            int status;
+            cout<<"BG"<<endl;
+            if(waitpid(listPids[i],&status,WNOHANG) > 0) //Greater then 0 means child died 
+            {
+                if(WIFSIGNALED(status) == true)
+                {
+                    cout<<"Erased "<<endl;
+                    listPids.erase(listPids.begin() + i);
+                    i = i - 1;
+                }
+                // cout<<"Checking pid for sleep "<<endl;
+                // listPids.erase(listPids.begin() + i);
+                // i = i - 1;
+            }
+        }
+
 
         // get tokenized commands from user input
         Tokenizer token(input);
@@ -174,8 +196,18 @@ int main()
                     // Wait until the last command finishes
                     if (i == token.commands.size() - 1)
                     {
-                        int status;
-                        waitpid(pid, &status, 0);
+                        if(token.commands.at(i)->isBackground())
+                        {
+                            cout<<"Pid pushed back"<<endl;
+                            listPids.push_back(pid);
+                        }
+                        else
+                        {
+                            int status;
+                            waitpid(pid, &status, 0);
+                        }
+                        // int status;
+                        // waitpid(pid, &status, 0);
                     }
                 }
             }
