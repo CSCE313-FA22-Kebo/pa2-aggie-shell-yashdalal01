@@ -41,8 +41,8 @@ public:
 
     // boolean functions to return if command has I/O redirection
     // or runs in background
-    bool hasInput ();
-    bool hasOutput ();
+    bool hasInput (); //Check if there is input
+    bool hasOutput (); //Check if there
     bool isBackground ();
 
 private:

@@ -11,6 +11,8 @@
 #include <vector>
 #include <string>
 #include <string.h>
+#include <fcntl.h>
+
 
 #include "Tokenizer.h"
 
@@ -24,10 +26,12 @@
 
 using namespace std;
 
+
 int main()
 {
     string oldPath;
     string newPath;
+    vector<pid_t> PIDS;
 
     for (;;)
     {
@@ -131,6 +135,20 @@ int main()
                     }
 
                     arguments.push_back(NULL);
+                    int opener;
+
+
+                    if(token.commands.at(i)->hasInput())
+                    {
+                        opener = open(token.commands.at(i)->in_file.c_str(), O_RDONLY , S_IRUSR);
+                        dup2(opener,STDIN_FILENO);
+                    }
+
+                    if(token.commands.at(i)->hasOutput())
+                    {
+                        opener = open(token.commands.at(i)->out_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+                        dup2(opener,STDOUT_FILENO);
+                    } 
 
                     if (i < token.commands.size() - 1)
                     {
@@ -169,48 +187,3 @@ int main()
     }
     return 0;
 }
-
-// // print out every command token-by-token on individual lines
-// // prints to cerr to avoid influencing autograder
-// for (auto cmd : token.commands) {
-//     for (auto str : cmd->args) {
-//         cerr << "|" << str << "| ";
-//     }
-//     if (cmd->hasInput()) {
-//         cerr << "in< " << cmd->in_file << " ";
-//     }
-//     if (cmd->hasOutput()) {
-//         cerr << "out> " << cmd->out_file << " ";
-//     }
-//     cerr << endl;
-// }
-
-/*
-        // fork to create child
-        pid_t pid = fork();
-        if (pid < 0)
-        {  // error check
-            perror("fork");
-            exit(2);
-        }
-
-        if (pid == 0)
-        {  // if child, exec to run command
-            // run single commands with no arguments
-            char* args[] = {(char*) tknr.commands.at(0)->args.at(0).c_str(), nullptr};
-
-            if (execvp(args[0], args) < 0)
-            {  // error check
-                perror("execvp");
-                exit(2);
-            }
-        }
-        else
-        {  // if parent, wait for child to finish
-            int status = 0;
-            waitpid(pid, &status, 0);
-            if (status > 1)
-            {  // exit if child didn't exec properly
-                exit(status);
-            }
-        } */
