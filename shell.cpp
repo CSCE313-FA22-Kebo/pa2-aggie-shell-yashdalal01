@@ -56,6 +56,7 @@ int main()
         int out = dup(1);
         //vector<char *> arguments;
         vector<char *> cdArgumentChecker;
+        int fd[2];
 
         if (input == "exit" || input == "Exit")
         { // print exit message and break out of infinite loop
@@ -139,7 +140,7 @@ int main()
             {
                 vector<char *> arguments;
 
-                int fd[2];
+                //int fd[2];
                 if (pipe(fd) == -1)
                 {
                     return 0;
