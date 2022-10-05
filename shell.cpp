@@ -25,9 +25,6 @@
 
 using namespace std;
 
-
-
-
 int main()
 {
     string oldPath;
@@ -52,14 +49,14 @@ int main()
         // get user inputted command
         string input;
         getline(cin, input);
+        cout<<"Input: "<<input<<endl;
 
         // Save original stdin and stdout
         int in = dup(0);
         int out = dup(1);
-        vector<char *> arguments;
+        //vector<char *> arguments;
         vector<char *> cdArgumentChecker;
 
-        
         if (input == "exit" || input == "Exit")
         { // print exit message and break out of infinite loop
             cout << RED << "Now exiting shell..." << endl
@@ -72,16 +69,16 @@ int main()
             continue;
         }
 
-        //Checking for background processes
-        for(long unsigned int i = 0; i<listPids.size();i++)
+        // Checking for background processes
+        for (long unsigned int i = 0; i < listPids.size(); i++)
         {
             int status;
-            cout<<"BG"<<endl;
-            if(waitpid(listPids[i],&status,WNOHANG) > 0) //Greater then 0 means child died 
+            cout << "BG" << endl;
+            if (waitpid(listPids[i], &status, WNOHANG) > 0) // Greater then 0 means child died
             {
-                if(WIFSIGNALED(status) == true)
+                if (WIFSIGNALED(status) == true)
                 {
-                    cout<<"Erased "<<endl;
+                    cout << "Erased " << endl;
                     listPids.erase(listPids.begin() + i);
                     i = i - 1;
                 }
@@ -90,7 +87,6 @@ int main()
                 // i = i - 1;
             }
         }
-
 
         // get tokenized commands from user input
         Tokenizer token(input);
@@ -140,6 +136,8 @@ int main()
         {
             for (long unsigned int i = 0; i < token.commands.size(); i++)
             {
+                vector<char *> arguments;
+
                 int fd[2];
                 if (pipe(fd) == -1)
                 {
@@ -159,18 +157,18 @@ int main()
                     arguments.push_back(NULL);
                     int opener;
 
-
-                    if(token.commands.at(i)->hasInput())
+                    if (token.commands.at(i)->hasInput())
                     {
-                        opener = open(token.commands.at(i)->in_file.c_str(), O_RDONLY , S_IRUSR);
-                        dup2(opener,STDIN_FILENO);
+                        opener = open(token.commands.at(i)->in_file.c_str(), O_RDONLY, S_IRUSR);
+                        dup2(opener, STDIN_FILENO);
                     }
 
-                    if(token.commands.at(i)->hasOutput())
+                    if (token.commands.at(i)->hasOutput())
                     {
+                        cout<<token.commands.at(i)->out_file.c_str()<<endl;
                         opener = open(token.commands.at(i)->out_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-                        dup2(opener,STDOUT_FILENO);
-                    } 
+                        dup2(opener, STDOUT_FILENO);
+                    }
 
                     if (i < token.commands.size() - 1)
                     {
@@ -193,22 +191,18 @@ int main()
                     // Close the write end of the pipe
                     close(fd[STDOUT_FILENO]);
 
-                    // Wait until the last command finishes
-                    if (i == token.commands.size() - 1)
+                    if (token.commands.at(i)->isBackground())
                     {
-                        if(token.commands.at(i)->isBackground())
-                        {
-                            cout<<"Pid pushed back"<<endl;
-                            listPids.push_back(pid);
-                        }
-                        else
-                        {
-                            int status;
-                            waitpid(pid, &status, 0);
-                        }
-                        // int status;
-                        // waitpid(pid, &status, 0);
+                        cout << "Pid pushed back" << endl;
+                        listPids.push_back(pid);
                     }
+                    else
+                    {
+                        int status;
+                        waitpid(pid, &status, 0);
+                    }
+                    // int status;
+                    // waitpid(pid, &status, 0);
                 }
             }
 
